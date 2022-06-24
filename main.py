@@ -96,6 +96,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_closed(self):
         pixmap = QtGui.QPixmap("temp/area.png")
+
+        try:
+            os.remove("temp/bg.png")
+        except:
+            pass
+
+        self.setFixedSize(pixmap.width(), pixmap.height()) 
         self.label.setPixmap(pixmap)
         self.show()
         self.adjustSize()
@@ -104,5 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     w = MainWindow()
+    w.setFixedSize(400, 300) 
+    w.move(50, 50) 
     w.show()
     sys.exit(app.exec_())
