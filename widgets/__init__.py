@@ -1,0 +1,2 @@
+NAME = 'widgets'
+
