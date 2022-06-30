@@ -1,8 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PIL import ImageGrab
 import pytesseract as pt
+from PIL import ImageGrab
 import os
-from pynput import keyboard
 import clipboard
 
 class SnippingWidget(QtWidgets.QMainWindow):
@@ -37,7 +36,7 @@ class SnippingWidget(QtWidgets.QMainWindow):
         img.save("temp/area.png")
         self.hide()
         QtWidgets.QApplication.restoreOverrideCursor()
-        self.closed.emit()
+        self.closed.emit() #Закрывать сразу все виджеты из slip_widgets
         self.start_point = QtCore.QPoint()
         self.end_point = QtCore.QPoint()
 
@@ -80,24 +79,38 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.clip_button, 1, 1)
         layout.addWidget(self.text, 2, 0)
 
-        self.snipper = SnippingWidget()
-        self.snipper.closed.connect(self.on_closed)
+        #self.snipper = SnippingWidget() 
+        #self.snipper.closed.connect(self.on_closed) 
 
-    def setBackground(self):
-        bg = ImageGrab.grab()
-        bg.save("temp/bg.png")
-        stylesheet = """
+    def setBackground(self, screen, widget, n):
+        geom = screen.geometry()
+        bg = screen.grabWindow(0)
+        bg.save("temp/bg" + str(n) + ".png")
+
+        stylesheet = ("""
             SnippingWidget {
-                background-image: url("temp/bg.png"); 
+                background-image: url("temp/bg""" + str(n) + """.png"); 
                 background-repeat: no-repeat; 
             }
-        """
-        self.snipper.setStyleSheet(stylesheet)
+        """)
+
+        widget.setStyleSheet(stylesheet)
 
     def activateSnipping(self):
-        self.setBackground()
-        self.snipper.showFullScreen()
-        self.snipper.show()
+        self.slip_widgets = list()
+        for n, i in enumerate(QtGui.QGuiApplication.screens()):
+                self.slip_widgets.append(SnippingWidget())
+                self.setBackground(i, self.slip_widgets[n], n)
+                self.slip_widgets[n].setFixedSize(1, 1)
+                self.slip_widgets[n].move(0, 0)
+                self.slip_widgets[n].show()
+                #self.slip_widgets[n].windowHandle().setScreen(i)
+                if n!=0:
+                    self.slip_widgets[n].move(2000, 0)
+                self.slip_widgets[n].showFullScreen()
+                self.slip_widgets[n].closed.connect(self.on_closed)
+        
+
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CrossCursor)
         self.hide()
 
@@ -105,14 +118,16 @@ class MainWindow(QtWidgets.QMainWindow):
         clipboard.copy(pt.image_to_string(img, lang = 'jpn'))
 
     def on_closed(self):
+        for i in self.slip_widgets:
+            i.closed.emit()
         pixmap = QtGui.QPixmap("temp/area.png")
         self.text.setText("Detected text:\n" + pt.image_to_string(img, lang = 'jpn'))
 
-  
-        try:
-            os.remove("temp/bg.png")
-        except:
-            pass
+        
+        #try:
+        #    os.remove("temp/bg.png")
+        #except:
+        #    pass
         
         if pixmap.width() > pixmap.height():
             self.label.setPixmap(pixmap.scaledToWidth(720))
