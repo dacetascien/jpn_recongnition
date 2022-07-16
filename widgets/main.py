@@ -1,8 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-import pytesseract as pt
 from PIL import ImageGrab
-import os
+import widgets
+import pytesseract as pt
+import time
+from pynput import keyboard
 import clipboard
+from translate import Translator
 
 class SnippingWidget(QtWidgets.QMainWindow):
     closed = QtCore.pyqtSignal()
@@ -19,7 +22,6 @@ class SnippingWidget(QtWidgets.QMainWindow):
         self.start_point = QtCore.QPoint()
         self.end_point = QtCore.QPoint()
         
-
     def mousePressEvent(self, event):
         self.start_point = event.pos()
         self.end_point = event.pos()
@@ -36,7 +38,7 @@ class SnippingWidget(QtWidgets.QMainWindow):
         img.save("temp/area.png")
         self.hide()
         QtWidgets.QApplication.restoreOverrideCursor()
-        self.closed.emit() #Закрывать сразу все виджеты из slip_widgets
+        self.closed.emit()
         self.start_point = QtCore.QPoint()
         self.end_point = QtCore.QPoint()
 
@@ -62,6 +64,7 @@ class SnippingWidget(QtWidgets.QMainWindow):
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
+
         self.centralWidget = QtWidgets.QWidget()
         self.secondWidget = QtWidgets.QWidget()
         self.setCentralWidget(self.centralWidget)
@@ -70,64 +73,67 @@ class MainWindow(QtWidgets.QMainWindow):
         self.area_button = QtWidgets.QPushButton('Select area')
         self.area_button.clicked.connect(self.activateSnipping)
         self.clip_button = QtWidgets.QPushButton('Copy to clipboard')
-        self.clip_button.clicked.connect(self.copyClipboard)
-        self.text = QtWidgets.QLabel()
+        self.clip_button.clicked.connect(self.copyClipboard) #Разобраться с копирование в клипборд
+        self.kanjiText = QtWidgets.QLabel()
+        self.transText = QtWidgets.QLabel() 
 
         layout = QtWidgets.QGridLayout(self.centralWidget)
         layout.addWidget(self.label, 0, 0)
         layout.addWidget(self.area_button, 1, 0)
         layout.addWidget(self.clip_button, 1, 1)
-        layout.addWidget(self.text, 2, 0)
+        layout.addWidget(self.kanjiText, 2, 0)
+        layout.addWidget(self.transText, 3, 0)
 
-        #self.snipper = SnippingWidget() 
-        #self.snipper.closed.connect(self.on_closed) 
+        self.snipper = SnippingWidget()
+        self.snipper.closed.connect(self.on_closed)
 
-    def setBackground(self, screen, widget, n):
-        geom = screen.geometry()
-        bg = screen.grabWindow(0)
-        bg.save("temp/bg" + str(n) + ".png")
-
-        stylesheet = ("""
+    def setBackground(self):
+        bg = ImageGrab.grab()
+        bg.save("temp/bg.png")
+        stylesheet = """
             SnippingWidget {
-                background-image: url("temp/bg""" + str(n) + """.png"); 
+                background-image: url("temp/bg.png"); 
                 background-repeat: no-repeat; 
             }
-        """)
-
-        widget.setStyleSheet(stylesheet)
+        """
+        self.snipper.setStyleSheet(stylesheet)
 
     def activateSnipping(self):
-        self.slip_widgets = list()
-        for n, i in enumerate(QtGui.QGuiApplication.screens()):
-                self.slip_widgets.append(SnippingWidget())
-                self.setBackground(i, self.slip_widgets[n], n)
-                self.slip_widgets[n].setFixedSize(1, 1)
-                self.slip_widgets[n].move(0, 0)
-                self.slip_widgets[n].show()
-                #self.slip_widgets[n].windowHandle().setScreen(i)
-                if n!=0:
-                    self.slip_widgets[n].move(2000, 0)
-                self.slip_widgets[n].showFullScreen()
-                self.slip_widgets[n].closed.connect(self.on_closed)
-        
-
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CrossCursor)
         self.hide()
+        time.sleep(0.1) #Костыль на ожидание закрытия окна
+        self.setBackground()
+        self.snipper.showFullScreen()
+        self.snipper.show()
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CrossCursor)
+
+    def deleteNoJpn(self, text): #Нужны также другие японские алфавиты
+        jpn = str()
+        for i in text:
+            if ((ord(i) <= 40879) and (ord(i) >= 19968)) or (ord(i) >= 12352) and (ord(i) <= 12447):
+                jpn = jpn + i
+        return jpn 
 
     def copyClipboard(self):
         clipboard.copy(pt.image_to_string(img, lang = 'jpn'))
 
-    def on_closed(self):
-        for i in self.slip_widgets:
-            i.closed.emit()
-        pixmap = QtGui.QPixmap("temp/area.png")
-        self.text.setText("Detected text:\n" + pt.image_to_string(img, lang = 'jpn'))
+    def translate(seld, text):
+        translator= Translator(to_lang="en", from_lang = "ja")
+        translation = translator.translate(text)
+        return translation
 
+    def on_closed(self):
+        pixmap = QtGui.QPixmap("temp/area.png")
+        jpn_text = self.deleteNoJpn(pt.image_to_string(img, lang = 'jpn'))
+        self.kanjiText.setText("Detected text:\n" + jpn_text)
+        self.transText.setText("Translsted text:\n" + self.translate(jpn_text))
         
-        #try:
-        #    os.remove("temp/bg.png")
-        #except:
-        #    pass
+        self.kanji = widgets.kanji.KanjiWidget(jpn_text)
+        self.kanji.show()
+        
+        try:  #Доделать нормальное удаление временных файлов
+            os.remove("temp/bg.png")
+        except:
+            pass
         
         if pixmap.width() > pixmap.height():
             self.label.setPixmap(pixmap.scaledToWidth(720))
