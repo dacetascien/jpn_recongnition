@@ -68,6 +68,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.centralWidget = QtWidgets.QWidget()
         self.secondWidget = QtWidgets.QWidget()
         self.setCentralWidget(self.centralWidget)
+        main_layout = QtWidgets.QVBoxLayout(self.centralWidget)
 
         self.label = QtWidgets.QLabel(alignment=QtCore.Qt.AlignCenter)
         self.area_button = QtWidgets.QPushButton('Select area')
@@ -78,11 +79,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.transText = QtWidgets.QLabel() 
 
         layout = QtWidgets.QGridLayout(self.centralWidget)
-        layout.addWidget(self.label, 0, 0)
-        layout.addWidget(self.area_button, 1, 0)
-        layout.addWidget(self.clip_button, 1, 1)
-        layout.addWidget(self.kanjiText, 2, 0)
-        layout.addWidget(self.transText, 3, 0)
+        text_layout = QtWidgets.QVBoxLayout(self.centralWidget)
+        main_layout.addLayout(layout)
+        main_layout.addLayout(text_layout)
+        layout.addWidget(self.label, 0, 0, 1, 3)
+        layout.addWidget(self.area_button, 1, 0, 1, 2)
+        layout.addWidget(self.clip_button, 1, 2, 1, 1)
+        text_layout.addWidget(self.kanjiText)
+        text_layout.addWidget(self.transText)
 
         self.snipper = SnippingWidget()
         self.snipper.closed.connect(self.on_closed)
@@ -96,6 +100,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 background-repeat: no-repeat; 
             }
         """
+        
         self.snipper.setStyleSheet(stylesheet)
 
     def activateSnipping(self):
@@ -123,17 +128,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_closed(self):
         pixmap = QtGui.QPixmap("temp/area.png")
+
         jpn_text = self.deleteNoJpn(pt.image_to_string(img, lang = 'jpn'))
         self.kanjiText.setText("Detected text:\n" + jpn_text)
         self.transText.setText("Translsted text:\n" + self.translate(jpn_text))
         
         self.kanji = widgets.kanji.KanjiWidget(jpn_text)
         self.kanji.show()
-        
-        try:  #Доделать нормальное удаление временных файлов
-            os.remove("temp/bg.png")
-        except:
-            pass
         
         if pixmap.width() > pixmap.height():
             self.label.setPixmap(pixmap.scaledToWidth(720))
