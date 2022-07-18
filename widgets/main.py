@@ -75,8 +75,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.area_button.clicked.connect(self.activateSnipping)
         self.clip_button = QtWidgets.QPushButton('Copy to clipboard')
         self.clip_button.clicked.connect(self.copyClipboard) #Разобраться с копирование в клипборд
-        self.kanjiText = QtWidgets.QLabel()
-        self.transText = QtWidgets.QLabel() 
+        self.kanjiText = widgets.scroll.ScrollLabel(self)
+        self.transText = widgets.scroll.ScrollLabel(self)
 
         layout = QtWidgets.QGridLayout(self.centralWidget)
         text_layout = QtWidgets.QVBoxLayout(self.centralWidget)
