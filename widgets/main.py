@@ -5,7 +5,7 @@ import pytesseract as pt
 import time
 from pynput import keyboard
 import clipboard
-from translate import Translator
+import translators as ts
 
 class SnippingWidget(QtWidgets.QMainWindow):
     closed = QtCore.pyqtSignal()
@@ -132,8 +132,7 @@ class MainWindow(QtWidgets.QMainWindow):
         clipboard.copy(pt.image_to_string(img, lang = 'jpn'))
 
     def translate(seld, text):
-        translator= Translator(to_lang="en", from_lang = "ja")
-        translation = translator.translate(text)
+        translation = ts.google(text, from_language='ja', to_language='en')
         return translation
 
     def on_closed(self):
