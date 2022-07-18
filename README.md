@@ -12,7 +12,7 @@ This app allows you to take screenshots of certain areas and recognize Japanese 
 Qt5 installation:
 
 ```
-sudo pacman -S Qt5
+sudo pacman -S qt5-base
 ```
 
 Python libraries installtion into virtual enviroment:
