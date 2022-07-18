@@ -77,6 +77,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.clip_button.clicked.connect(self.copyClipboard) #Разобраться с копирование в клипборд
         self.kanjiText = widgets.scroll.ScrollLabel(self)
         self.transText = widgets.scroll.ScrollLabel(self)
+        self.kanjiAnnotation = QtWidgets.QLabel()
+        self.transAnnotation = QtWidgets.QLabel()
 
         layout = QtWidgets.QGridLayout(self.centralWidget)
         text_layout = QtWidgets.QVBoxLayout(self.centralWidget)
@@ -85,8 +87,16 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.label, 0, 0, 1, 3)
         layout.addWidget(self.area_button, 1, 0, 1, 2)
         layout.addWidget(self.clip_button, 1, 2, 1, 1)
+        text_layout.addWidget(self.kanjiAnnotation)
         text_layout.addWidget(self.kanjiText)
+        text_layout.addWidget(self.transAnnotation)
         text_layout.addWidget(self.transText)
+        self.kanjiAnnotation.setText("Detected text: ")
+        self.transAnnotation.setText("Translsted text: ")
+        self.kanjiAnnotation.hide()
+        self.transAnnotation.hide()
+        self.kanjiText.hide()
+        self.transText.hide()
 
         self.snipper = SnippingWidget()
         self.snipper.closed.connect(self.on_closed)
@@ -130,9 +140,13 @@ class MainWindow(QtWidgets.QMainWindow):
         pixmap = QtGui.QPixmap("temp/area.png")
 
         jpn_text = self.deleteNoJpn(pt.image_to_string(img, lang = 'jpn'))
-        self.kanjiText.setText("Detected text:\n" + jpn_text)
-        self.transText.setText("Translsted text:\n" + self.translate(jpn_text))
-        
+        self.kanjiText.setText(jpn_text)
+        self.transText.setText(self.translate(jpn_text))
+        self.kanjiAnnotation.show()
+        self.transAnnotation.show()
+        self.kanjiText.show()
+        self.transText.show()
+
         self.kanji = widgets.kanji.KanjiWidget(jpn_text)
         self.kanji.show()
         

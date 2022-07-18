@@ -13,7 +13,7 @@ class KanjiWidget(QtWidgets.QMainWindow):
 
         self.showKanjiInfo(self.KanjiText)
 
-    def UiComponents(self, text):
+    def setTextScroll(self, text):
 
         # creating scroll label
         label = scroll.ScrollLabel(self)
@@ -33,7 +33,7 @@ class KanjiWidget(QtWidgets.QMainWindow):
                 kanji_info = kanji_info + "Symbol: " + i + " " + "Frequency: " + str(self.kanji_data[i]["freq"]) + " " + "Meaning: " + str(self.kanji_data[i]["wk_meanings"]) + "\n" 
                 #Рассмотреть случай отсутствия символа в kanji_dat
 
-        self.UiComponents(kanji_info)
+        self.setTextScroll(kanji_info)
 
     def deleteNoKanji(self, text):
         kanji = str()
