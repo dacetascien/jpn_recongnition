@@ -3,7 +3,6 @@ from PIL import ImageGrab
 import widgets
 import pytesseract as pt
 import time
-from pynput import keyboard
 import clipboard
 import translators as ts
 
@@ -124,7 +123,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def deleteNoJpn(self, text): #Нужны также другие японские алфавиты
         jpn = str()
         for i in text:
-            if ((ord(i) <= 40879) and (ord(i) >= 19968)) or (ord(i) >= 12352) and (ord(i) <= 12447):
+            if ((ord(i) <= 40879) and (ord(i) >= 19968)) or ((ord(i) >= 12352) and (ord(i) <= 12447)) or (ord(i) == 12290) or (ord(i) == 65292) or (ord(i) == 12289):
                 jpn = jpn + i
         return jpn 
 
