@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from widgets import scroll
 import json
 import os 
 
@@ -6,19 +7,22 @@ class KanjiWidget(QtWidgets.QMainWindow):
     def __init__(self, text, parent = None):
         super(KanjiWidget, self).__init__(parent)
 
-        self.centralWidget = QtWidgets.QWidget()
-        self.secondWidget = QtWidgets.QWidget()
-        self.setCentralWidget(self.centralWidget)
-
         self.setFixedSize(500, 500)
         self.move(0, 0)
         self.KanjiText = text
-        self.KanjiLabel = QtWidgets.QLabel()
-
-        layout = QtWidgets.QGridLayout(self.centralWidget)
-        layout.addWidget(self.KanjiLabel)
 
         self.showKanjiInfo(self.KanjiText)
+
+    def UiComponents(self, text):
+
+        # creating scroll label
+        label = scroll.ScrollLabel(self)
+ 
+        # setting text to the label
+        label.setText(text)
+ 
+        # setting geometry
+        label.setGeometry(20, 20, 460, 460)
 
     def showKanjiInfo(self, text):
         text = self.deleteNoKanji(text)
@@ -26,10 +30,10 @@ class KanjiWidget(QtWidgets.QMainWindow):
         with open("data/kanji.json", "r") as kanji_json:
             self.kanji_data = json.load(kanji_json)
             for i in text:
-                kanji_info = kanji_info + "Symbol: " + i + "\n" + "Frequency: " + str(self.kanji_data[i]["freq"]) + "\n" 
+                kanji_info = kanji_info + "Symbol: " + i + " " + "Frequency: " + str(self.kanji_data[i]["freq"]) + " " + "Meaning: " + str(self.kanji_data[i]["wk_meanings"]) + "\n" 
                 #Рассмотреть случай отсутствия символа в kanji_dat
 
-        self.KanjiLabel.setText(kanji_info)
+        self.UiComponents(kanji_info)
 
     def deleteNoKanji(self, text):
         kanji = str()
