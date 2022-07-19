@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Japanese Recognition
+StartupWMClass=jpn_recognition
+Comment=This app allows you to detect, copy and translate japanese from screenshot are.
+Exec=/usr/bin/jpn_recognition/start.sh
+Icon=/usr/bin/jpn_recognition/icon.png
+Type=Application
+Path=/usr/bin
