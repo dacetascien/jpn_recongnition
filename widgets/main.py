@@ -34,7 +34,7 @@ class SnippingWidget(QtWidgets.QMainWindow):
         r = QtCore.QRect(self.start_point, self.end_point).normalized()
         global img
         img = ImageGrab.grab(r.getCoords())
-        img.save("temp/area.png")
+        img.save("/tmp/area.png")
         self.hide()
         QtWidgets.QApplication.restoreOverrideCursor()
         self.closed.emit()
@@ -102,10 +102,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def setBackground(self):
         bg = ImageGrab.grab()
-        bg.save("temp/bg.png")
+        bg.save("/tmp/bg.png")
         stylesheet = """
             SnippingWidget {
-                background-image: url("temp/bg.png"); 
+                background-image: url("/tmp/bg.png"); 
                 background-repeat: no-repeat; 
             }
         """
@@ -135,7 +135,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return translation
 
     def on_closed(self):
-        pixmap = QtGui.QPixmap("temp/area.png")
+        pixmap = QtGui.QPixmap("/tmp/area.png")
 
         jpn_text = self.deleteNoJpn(pt.image_to_string(img, lang = 'jpn'))
         self.kanjiText.setText(jpn_text)
