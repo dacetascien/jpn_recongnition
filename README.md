@@ -15,6 +15,12 @@ Qt5 installation:
 sudo pacman -S qt5-base
 ```
 
+Tesseract datapack installation:
+
+```
+sudo pacman -S tesseract-data-jpn
+```
+
 ##### Manually
 
 Copying repository:
@@ -36,7 +42,7 @@ Copying files to /usr/bin and /usr/share/applications/:
 
 ```
 sudo cp jpn_recognition.desktop /usr/share/applications
-sudo cp -r $DIRPATH /usr/bin/jpn_recognition
+sudo cp -r . /usr/bin/jpn_recognition
 ```
 
 Giving permissions to start script:
