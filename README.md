@@ -73,6 +73,18 @@ chmod +x uninstall.sh
 sudo ./uninstall.sh
 ```
 
+## Docker
+
+To build docker:
+```
+sudo docker build -t jpn_recognition .
+```
+
+To run docker container:
+```
+sudo docker run -e "DISPLAY=$DISPLAY" -v "$HOME/.Xauthority:/root/.Xauthority:ro" --network host jpn_recognition
+```
+
 ## References
 
 All of the data comes from the following sources:
